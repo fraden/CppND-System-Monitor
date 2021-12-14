@@ -4,12 +4,30 @@
 #include <string>
 #include <vector>
 
+#include <iostream>
+
 #include "linux_parser.h"
 
 using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+
+template <typename T> T getKey(T filepath, string searchKey){
+  	string line, key, value;
+  	std::ifstream stream(filepath);
+    if (stream.is_open()) {
+    while(std::getline(stream, line)){
+    	std::istringstream linestream(line);
+      while (linestream >> key >> value) {
+        if (key == searchKey) {
+          return value;
+        }
+      }
+    }
+    }
+  return value;
+}
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -101,7 +119,25 @@ long LinuxParser::UpTime() {
 }
 
 // TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+long LinuxParser::Jiffies() { 
+  string line, key;
+  int sum{0};
+  std::ifstream filestream(kProcDirectory + kStatFilename);
+  if (filestream.is_open()) {
+  	while(std::getline(filestream, line)){
+      std::istringstream linestream(line);
+      linestream >> key;
+      if (key=="cpu"){
+        int value;
+      	while(linestream >> value){
+        	sum+=value;
+        }
+        return sum;
+      }
+    }  
+  }
+  return sum;
+  }
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
@@ -131,11 +167,13 @@ int LinuxParser::TotalProcesses() {
       }
     }
   }
-  return 0;
+  return -1;
   }
 
 // TODO: Read and return the number of running processes
-int LinuxParser::RunningProcesses() { return 0; }
+int LinuxParser::RunningProcesses() { 
+  return std::stoi(getKey(kProcDirectory + kStatFilename, "procs_running"));
+  }
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
