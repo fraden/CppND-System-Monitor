@@ -13,7 +13,7 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-template <typename T> T getKey(T filepath, string searchKey){
+template <typename T> T valOfKeyInFile(T filepath, string searchKey){
   	string line, key, val;
   	std::ifstream stream(filepath);
     if (stream.is_open()) {
@@ -88,8 +88,8 @@ vector<int> LinuxParser::Pids() {
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { 
   float memTotal, memFree;
-  memTotal = std::stof(getKey(kProcDirectory + kMeminfoFilename, "MemTotal:"));
-  memFree = std::stof(getKey(kProcDirectory + kMeminfoFilename, "MemFree:"));
+  memTotal = std::stof(valOfKeyInFile(kProcDirectory + kMeminfoFilename, "MemTotal:"));
+  memFree = std::stof(valOfKeyInFile(kProcDirectory + kMeminfoFilename, "MemFree:"));
   return (memTotal-memFree)/memTotal; //see https://stackoverflow.com/questions/41224738/how-to-calculate-system-memory-usage-from-proc-meminfo-like-htop/41251290#41251290
   }
 
@@ -180,13 +180,13 @@ vector<string> LinuxParser::CpuUtilization() {
 // TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() { 
   int processes{-1};
-  processes = std::stoi(getKey(kProcDirectory + kStatFilename, "processes"));
+  processes = std::stoi(valOfKeyInFile(kProcDirectory + kStatFilename, "processes"));
   return processes;
   }
 
 // TODO: Read and return the number of running processes
 int LinuxParser::RunningProcesses() { 
-  return std::stoi(getKey(kProcDirectory + kStatFilename, "procs_running"));
+  return std::stoi(valOfKeyInFile(kProcDirectory + kStatFilename, "procs_running"));
   }
 
 // TODO: Read and return the command associated with a process
@@ -204,13 +204,13 @@ string LinuxParser::Command(int pid) {
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::Ram(int pid) {
   std::ifstream stream(kProcDirectory + to_string(pid) + kStatusFilename);
-  return getKey(kProcDirectory + to_string(pid) + kStatusFilename, "VmSize:"); //todo: evtl. umrechnen
+  return valOfKeyInFile(kProcDirectory + to_string(pid) + kStatusFilename, "VmSize:"); //todo: evtl. umrechnen
 }
 
 // TODO: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::Uid(int pid) { 
-  return getKey(kProcDirectory + to_string(pid) + kStatusFilename, "Uid:");; 
+  return valOfKeyInFile(kProcDirectory + to_string(pid) + kStatusFilename, "Uid:");; 
 }
 
 // TODO: Read and return the user associated with a process
