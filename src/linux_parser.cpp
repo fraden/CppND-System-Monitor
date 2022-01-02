@@ -87,22 +87,24 @@ vector<int> LinuxParser::Pids() {
 
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { 
-  string line, key, val;
+  string line, key, val, unit;
   float memTotal, memFree;
   std::ifstream stream(kProcDirectory + kMeminfoFilename);
   if (stream.is_open()) {
-    std::getline(stream, line);
+    while (std::getline(stream, line)) {
     std::istringstream linestream(line);
-    while (linestream >> key >> val) {
-        if (key == "MemTotal") {
-          memTotal = std::stof(val);
-        }
-      if (key == "MemFree") {
-          memFree = std::stof(val);
+    while (linestream >> key >> val >> unit) {
+        if(key == "MemTotal:"){
+        memTotal = std::stof(val);
       }
+      if(key == "MemFree:"){
+        memFree = std::stof(val);
+      }
+      
     }
   }
-    return ((memTotal - memFree)/memTotal); //see https://stackoverflow.com/questions/41224738/how-to-calculate-system-memory-usage-from-proc-meminfo-like-htop/41251290#41251290
+  }
+    return (memTotal-memFree)/memTotal; //see https://stackoverflow.com/questions/41224738/how-to-calculate-system-memory-usage-from-proc-meminfo-like-htop/41251290#41251290
   }
 
 // TODO: Read and return the system uptime
@@ -143,17 +145,18 @@ long LinuxParser::Jiffies() {
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::ActiveJiffies(int pid) { 
   string line, val;
-  vector<long> vals;
+  vector<string> vals;
   string path = kProcDirectory + to_string(pid) + kStatFilename;
   std::ifstream stream(path);
   if (stream.is_open()) {
     std::getline(stream, line);
     std::istringstream linestream(line);
     while (linestream >> val) {
-      vals.push_back(stol(val));
+      vals.push_back(val);
     }
   }
-  return vals[13] + vals[14]; }
+  return stol(vals[13]) + stol(vals[14]); }
+  
 
 // TODO: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() { 
